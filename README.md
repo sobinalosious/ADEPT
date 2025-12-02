@@ -38,23 +38,25 @@ conda activate polymer-workflow
 PySIMM can be installed inside your conda environment.
 
 Option 1 — Simple install with pip
+```bash
 conda activate polymer-workflow
 
 git clone https://github.com/polysimtools/pysimm.git
 cd pysimm
 pip install .
+```
 
-# Add the following line to your ~/.bashrc (edit the LAMMPS path as needed)
+ Add the following line to your ~/.bashrc (edit the LAMMPS path as needed)
 export LAMMPS_EXEC="/usr/bin/lmp"
-
 source ~/.bashrc
 
 Option 2 — Using complete_install.py
+```bash
 conda activate polymer-workflow
 
 git clone https://github.com/polysimtools/pysimm.git
 python pysimm/complete_install.py --pysimm "$PWD"
-
+```
 
 PySIMM handles polymer chain construction, random-walk polymerization, GAFF2 parameter assignment, RESP/Gasteiger charges, and LAMMPS data file generation.---
 
@@ -131,11 +133,11 @@ Computes polymer dielectric properties from MD:
 
 **DO_TC**
 
-Computes thermal conductivity using MD (Green–Kubo or NEMD depending on your LAMMPS inputs).
+Computes thermal conductivity using NEMD method.
 
 **DO_TG**
 
-Reads Tg from `TG_EXP.csv` or from your MD-based Tg method and generates `TG_MD.csv`.
+Computes Glass Transition Temperature.
 
 **DO_VISC**
 
