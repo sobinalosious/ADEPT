@@ -1,5 +1,4 @@
-#ADEPT: Automated molecular Dynamics Engine for Polymer simulaTions
-# Polymer Workflow: MD + DFT Property Pipeline
+# ADEPT: Automated molecular Dynamics Engine for Polymer simulaTions
 
 This workflow automates the generation of polymer structures from SMILES, performs molecular dynamics (MD) simulations using LAMMPS, and computes a wide range of polymer properties including density, Tg, Cp, dielectric constant, thermal conductivity, viscosity, and mechanical moduli. It also computes DFT-level monomer electronic properties using Psi4.
 
