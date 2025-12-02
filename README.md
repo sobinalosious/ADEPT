@@ -35,25 +35,28 @@ conda activate polymer-workflow
 ## 2. Install PySIMM
 
 
+PySIMM can be installed inside your conda environment.
+
+Option 1 — Simple install with pip
 conda activate polymer-workflow
+
 git clone https://github.com/polysimtools/pysimm.git
 cd pysimm
 pip install .
-Add the following line to your ~/.bashrc file:
-export LAMMPS_EXEC="export LAMMPS_EXEC=/usr/bin/lmp"   (change as per your path )
+
+# Add the following line to your ~/.bashrc (edit the LAMMPS path as needed)
+export LAMMPS_EXEC="/usr/bin/lmp"
+
 source ~/.bashrc
 
-OR
+Option 2 — Using complete_install.py
+conda activate polymer-workflow
 
-Inside the active conda environment:
-
-git clone https://github.com/polysimtools/pysimm
-python pysimm/complete_install.py --pysimm $PWD
-
-PySIMM handles polymer chain construction, random-walk polymerization, GAFF2 parameter assignment, RESP/Gasteiger charges, and LAMMPS data file generation.
+git clone https://github.com/polysimtools/pysimm.git
+python pysimm/complete_install.py --pysimm "$PWD"
 
 
----
+PySIMM handles polymer chain construction, random-walk polymerization, GAFF2 parameter assignment, RESP/Gasteiger charges, and LAMMPS data file generation.---
 
 ## 3. Load LAMMPS on HPC
 
