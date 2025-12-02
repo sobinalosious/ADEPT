@@ -1,0 +1,20 @@
+name: polymer-workflow
+channels:
+  - conda-forge
+  - psi4
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - rdkit
+  - psi4
+  - scikit-learn
+  - joblib
+  - packaging
+  - simple-dftd3      
+  - dftd3-python      
+
+  - pip
+  - pip:
+      - git+https://github.com/cdsgroup/resp.git
+# - install pysimm  separately 

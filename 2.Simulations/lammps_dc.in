@@ -1,0 +1,49 @@
+log             ${name}_dc.log
+
+units           real
+atom_style      full
+
+# Define force fields (these need to be adapted based on your system)
+pair_style      lj/cut/coul/long 12.0  12.0
+kspace_style    pppm 1e-6
+bond_style      harmonic
+angle_style     harmonic
+dihedral_style  fourier
+improper_style  cvff
+special_bonds   amber
+pair_modify     mix arithmetic
+
+# Read the system data
+read_data 		../../OPTIMIZATION/${name}/${name}_eq2.data 
+
+
+# Define the timestep
+timestep        1.0
+
+# Neighbor settings
+neighbor        2.5 bin
+#neigh_modify    delay 0 every 50 check no
+neigh_modify 	delay 0 every 1 check yes
+fix				SHAKE2 all shake 1e-4 1000 0 m 1.0
+
+
+
+fix 1 all nvt temp 300.0 300.0 100.0
+
+compute myDipole1 all dipole
+variable dipole1 equal c_myDipole1[1]
+variable dipole2 equal c_myDipole1[2]
+variable dipole3 equal c_myDipole1[3]
+variable dipole4 equal c_myDipole1
+variable volume equal vol
+
+
+
+fix dipolePrint all print 1000 "${dipole1} ${dipole2} ${dipole3} ${dipole4} ${volume} " file ${name}_dipole_fluctuation.dat  screen no
+
+
+
+thermo_style custom step temp press density vol 
+thermo 1000  
+
+run 5000000

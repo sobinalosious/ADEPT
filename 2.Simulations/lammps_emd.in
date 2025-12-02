@@ -1,0 +1,154 @@
+log log.elastic_T
+####################################
+# 1st stage equilibration
+####################################
+units		real
+atom_style	full
+boundary	p p p
+
+bond_style		harmonic  
+angle_style		harmonic
+dihedral_style	fourier
+improper_style	cvff
+
+pair_style		lj/cut/coul/long 8.0 12.0
+pair_modify		mix arithmetic
+special_bonds	amber
+neighbor		3.0 bin
+neigh_modify	delay 0 every 1
+kspace_style	pppm 1e-6
+
+
+read_data       ../../OPTIMIZATION/${name}/${name}_eq2.data
+
+fix				SHAKE3 all shake 1e-4 1000 0 m 1.0
+
+fix				NPT all npt temp 300 300 100 iso 1.0 1.0 1000
+
+
+variable volume equal vol
+variable temperature equal temp
+variable energy equal etotal
+variable pressure equal press
+variable dens equal density
+
+
+fix propertiesPrint all print 100 "${temperature} ${energy} ${pressure} ${volume} ${dens}" file ${name}_npt_properties.dat  screen no
+
+
+
+run				8000000 every 80000 "write_data eq2_*.data"
+unfix			NPT
+unfix			propertiesPrint
+unfix			SHAKE3
+clear
+
+
+shell cp ../../../2.Simulations/modulus_files/displace.mod .
+shell cp ../../../2.Simulations/modulus_files/post_vrh.mod .
+
+
+####################################
+# 2nd Modulus Calculation
+####################################
+include ../../../2.Simulations/modulus_files/in_1.elastic
+include ../../../2.Simulations/modulus_files/in_2.elastic
+include ../../../2.Simulations/modulus_files/in_3.elastic
+include ../../../2.Simulations/modulus_files/in_4.elastic
+include ../../../2.Simulations/modulus_files/in_5.elastic
+include ../../../2.Simulations/modulus_files/in_6.elastic
+include ../../../2.Simulations/modulus_files/in_7.elastic
+include ../../../2.Simulations/modulus_files/in_8.elastic
+include ../../../2.Simulations/modulus_files/in_9.elastic
+include ../../../2.Simulations/modulus_files/in_10.elastic
+include ../../../2.Simulations/modulus_files/in_11.elastic
+include ../../../2.Simulations/modulus_files/in_12.elastic
+include ../../../2.Simulations/modulus_files/in_13.elastic
+include ../../../2.Simulations/modulus_files/in_14.elastic
+include ../../../2.Simulations/modulus_files/in_15.elastic
+include ../../../2.Simulations/modulus_files/in_16.elastic
+include ../../../2.Simulations/modulus_files/in_17.elastic
+include ../../../2.Simulations/modulus_files/in_18.elastic
+include ../../../2.Simulations/modulus_files/in_19.elastic
+include ../../../2.Simulations/modulus_files/in_20.elastic
+include ../../../2.Simulations/modulus_files/in_21.elastic
+include ../../../2.Simulations/modulus_files/in_22.elastic
+include ../../../2.Simulations/modulus_files/in_23.elastic
+include ../../../2.Simulations/modulus_files/in_24.elastic
+include ../../../2.Simulations/modulus_files/in_25.elastic
+include ../../../2.Simulations/modulus_files/in_26.elastic
+include ../../../2.Simulations/modulus_files/in_27.elastic
+include ../../../2.Simulations/modulus_files/in_28.elastic
+include ../../../2.Simulations/modulus_files/in_29.elastic
+include ../../../2.Simulations/modulus_files/in_30.elastic
+include ../../../2.Simulations/modulus_files/in_31.elastic
+include ../../../2.Simulations/modulus_files/in_32.elastic
+include ../../../2.Simulations/modulus_files/in_33.elastic
+include ../../../2.Simulations/modulus_files/in_34.elastic
+include ../../../2.Simulations/modulus_files/in_35.elastic
+include ../../../2.Simulations/modulus_files/in_36.elastic
+include ../../../2.Simulations/modulus_files/in_37.elastic
+include ../../../2.Simulations/modulus_files/in_38.elastic
+include ../../../2.Simulations/modulus_files/in_39.elastic
+include ../../../2.Simulations/modulus_files/in_40.elastic
+include ../../../2.Simulations/modulus_files/in_41.elastic
+include ../../../2.Simulations/modulus_files/in_42.elastic
+include ../../../2.Simulations/modulus_files/in_43.elastic
+include ../../../2.Simulations/modulus_files/in_44.elastic
+include ../../../2.Simulations/modulus_files/in_45.elastic
+include ../../../2.Simulations/modulus_files/in_46.elastic
+include ../../../2.Simulations/modulus_files/in_47.elastic
+include ../../../2.Simulations/modulus_files/in_48.elastic
+include ../../../2.Simulations/modulus_files/in_49.elastic
+include ../../../2.Simulations/modulus_files/in_50.elastic
+include ../../../2.Simulations/modulus_files/in_51.elastic
+include ../../../2.Simulations/modulus_files/in_52.elastic
+include ../../../2.Simulations/modulus_files/in_53.elastic
+include ../../../2.Simulations/modulus_files/in_54.elastic
+include ../../../2.Simulations/modulus_files/in_55.elastic
+include ../../../2.Simulations/modulus_files/in_56.elastic
+include ../../../2.Simulations/modulus_files/in_57.elastic
+include ../../../2.Simulations/modulus_files/in_58.elastic
+include ../../../2.Simulations/modulus_files/in_59.elastic
+include ../../../2.Simulations/modulus_files/in_60.elastic
+include ../../../2.Simulations/modulus_files/in_61.elastic
+include ../../../2.Simulations/modulus_files/in_62.elastic
+include ../../../2.Simulations/modulus_files/in_63.elastic
+include ../../../2.Simulations/modulus_files/in_64.elastic
+include ../../../2.Simulations/modulus_files/in_65.elastic
+include ../../../2.Simulations/modulus_files/in_66.elastic
+include ../../../2.Simulations/modulus_files/in_67.elastic
+include ../../../2.Simulations/modulus_files/in_68.elastic
+include ../../../2.Simulations/modulus_files/in_69.elastic
+include ../../../2.Simulations/modulus_files/in_70.elastic
+include ../../../2.Simulations/modulus_files/in_71.elastic
+include ../../../2.Simulations/modulus_files/in_72.elastic
+include ../../../2.Simulations/modulus_files/in_73.elastic
+include ../../../2.Simulations/modulus_files/in_74.elastic
+include ../../../2.Simulations/modulus_files/in_75.elastic
+include ../../../2.Simulations/modulus_files/in_76.elastic
+include ../../../2.Simulations/modulus_files/in_77.elastic
+include ../../../2.Simulations/modulus_files/in_78.elastic
+include ../../../2.Simulations/modulus_files/in_79.elastic
+include ../../../2.Simulations/modulus_files/in_80.elastic
+include ../../../2.Simulations/modulus_files/in_81.elastic
+include ../../../2.Simulations/modulus_files/in_82.elastic
+include ../../../2.Simulations/modulus_files/in_83.elastic
+include ../../../2.Simulations/modulus_files/in_84.elastic
+include ../../../2.Simulations/modulus_files/in_85.elastic
+include ../../../2.Simulations/modulus_files/in_86.elastic
+include ../../../2.Simulations/modulus_files/in_87.elastic
+include ../../../2.Simulations/modulus_files/in_88.elastic
+include ../../../2.Simulations/modulus_files/in_89.elastic
+include ../../../2.Simulations/modulus_files/in_90.elastic
+include ../../../2.Simulations/modulus_files/in_91.elastic
+include ../../../2.Simulations/modulus_files/in_92.elastic
+include ../../../2.Simulations/modulus_files/in_93.elastic
+include ../../../2.Simulations/modulus_files/in_94.elastic
+include ../../../2.Simulations/modulus_files/in_95.elastic
+include ../../../2.Simulations/modulus_files/in_96.elastic
+include ../../../2.Simulations/modulus_files/in_97.elastic
+include ../../../2.Simulations/modulus_files/in_98.elastic
+include ../../../2.Simulations/modulus_files/in_99.elastic
+include ../../../2.Simulations/modulus_files/in_100.elastic
+

@@ -1,0 +1,154 @@
+# Define the finite deformation size. Try several values of this
+# variable to verify that results do not depend on it.
+variable up equal 2.0e-2
+ 
+# real units, elastic constants in GPa
+units		real
+variable cfac equal 1.01325e-4
+variable cunits string GPa
+
+# Define MD parameters
+variable nevery equal 10                  # sampling interval
+variable nrepeat equal 10                 # number of samples
+variable nfreq equal ${nevery}*${nrepeat} # length of one average
+variable nthermo equal ${nfreq}           # interval for thermo output
+variable nequil equal 10*${nthermo}       # length of equilibration run
+variable nrun equal 3*${nthermo}          # length of equilibrated run
+variable temp equal 300.0                 # temperature of initial sample
+variable timestep equal 0.25              # timestep (femtoseconds)
+variable adiabatic equal 0                # adiabatic (1) or isothermal (2)
+variable tdamp equal 100                  # time constant for thermostat
+variable seed equal 123457                # seed for thermostat
+
+units        real
+dimension 3
+boundary p p p
+atom_style	 full
+pair_style	 lj/cut/coul/long 12.0 12.0
+pair_modify  mix arithmetic
+bond_style   harmonic
+angle_style  harmonic
+dihedral_style fourier
+improper_style cvff
+special_bonds amber
+kspace_style pppm 1e-4
+
+read_data eq2_5440000.data
+change_box all triclinic
+velocity	all create ${temp} 87287
+
+# Compute initial state
+
+variable thermostat equal 1
+# we must undefine any fix ave/* fix before using reset_timestep
+if "$(is_defined(fix,avp))" then "unfix avp"
+reset_timestep 0
+
+kspace_style pppm 1.0e-4
+neighbor    2.5 bin
+neigh_modify  delay 0 every 25 check no
+
+# Setup output
+
+fix avp all ave/time  ${nevery} ${nrepeat} ${nfreq} c_thermo_press mode vector
+thermo		${nthermo}
+thermo_style custom step temp pe press f_avp[1] f_avp[2] f_avp[3] f_avp[4] f_avp[5] f_avp[6]
+thermo_modify norm no
+
+# Setup MD
+
+timestep ${timestep}
+fix 4 all nve
+if "${thermostat} == 1" then &
+   "fix 5 all langevin ${temp} ${temp} ${tdamp} ${seed}"
+run ${nequil}
+
+if "${adiabatic} == 1" &
+then "variable thermostat equal 0" &
+else "variable thermostat equal 1"
+
+print ${thermostat}
+
+# we must undefine any fix ave/* fix before using reset_timestep
+if "$(is_defined(fix,avp))" then "unfix avp"
+reset_timestep 0
+
+kspace_style pppm 1.0e-4
+neighbor    2.5 bin
+neigh_modify  delay 0 every 25 check no
+
+# Setup output
+
+fix avp all ave/time  ${nevery} ${nrepeat} ${nfreq} c_thermo_press mode vector
+thermo		${nthermo}
+thermo_style custom step temp pe press f_avp[1] f_avp[2] f_avp[3] f_avp[4] f_avp[5] f_avp[6]
+thermo_modify norm no
+
+# Setup MD
+
+timestep ${timestep}
+fix 4 all nve
+if "${thermostat} == 1" then &
+   "fix 5 all langevin ${temp} ${temp} ${tdamp} ${seed}"
+run ${nrun}
+
+variable pxx0 equal f_avp[1]
+variable pyy0 equal f_avp[2]
+variable pzz0 equal f_avp[3]
+variable pxy0 equal f_avp[4]
+variable pxz0 equal f_avp[5]
+variable pyz0 equal f_avp[6]
+
+variable tmp equal lx
+variable lx0 equal ${tmp}
+variable tmp equal ly
+variable ly0 equal ${tmp}
+variable tmp equal lz
+variable lz0 equal ${tmp}
+
+# These formulas define the derivatives w.r.t. strain components
+# Constants uses $, variables use v_ 
+variable d1 equal -(v_pxx1-${pxx0})/(v_delta/v_len0)*${cfac}
+variable d2 equal -(v_pyy1-${pyy0})/(v_delta/v_len0)*${cfac}
+variable d3 equal -(v_pzz1-${pzz0})/(v_delta/v_len0)*${cfac}
+variable d4 equal -(v_pyz1-${pyz0})/(v_delta/v_len0)*${cfac}
+variable d5 equal -(v_pxz1-${pxz0})/(v_delta/v_len0)*${cfac}
+variable d6 equal -(v_pxy1-${pxy0})/(v_delta/v_len0)*${cfac}
+
+# Write restart
+write_restart restart.equil
+
+# uxx Perturbation
+
+variable dir equal 1
+include displace.mod
+
+# uyy Perturbation
+
+variable dir equal 2
+include displace.mod
+
+# uzz Perturbation
+
+variable dir equal 3
+include displace.mod
+
+# uyz Perturbation
+
+variable dir equal 4
+include displace.mod
+
+# uxz Perturbation
+
+variable dir equal 5
+include displace.mod
+
+# uxy Perturbation
+
+variable dir equal 6
+include displace.mod
+
+# Output final values
+
+include post_vrh.mod
+clear

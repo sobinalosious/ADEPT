@@ -1,0 +1,84 @@
+###############################################################################
+# Tg Scan (NPT) — minimal, matched to your FF & data path (with Tmin clamp)
+###############################################################################
+
+# ---------------- User Vars (override via -var) ----------------
+variable   scan_range    equal 150
+variable   tstep         equal 10
+variable   eq_ns         equal 0.5
+variable   prod_ns       equal 0.5
+variable   timestep_fs   equal 1
+
+# Expect: -var Tg_input <K> -var name <system>
+
+# ---------------- Derived (Tmin clamp via ternary, no spaces in expr) --------
+variable   Tmin         equal 50
+variable   tstart       equal v_Tg_input+v_scan_range
+variable   tend_raw     equal v_Tg_input-v_scan_range
+variable   tend         equal ternary(v_tend_raw>v_Tmin,v_tend_raw,v_Tmin)
+
+variable   eq_steps     equal ceil(v_eq_ns*1000000.0/v_timestep_fs)
+variable   prod_steps   equal ceil(v_prod_ns*1000000.0/v_timestep_fs)
+variable   nsteps       equal floor((v_tstart-v_tend)/v_tstep+1)
+
+# guard against degenerate ranges
+if "${nsteps}<1" then &
+  "variable nsteps equal 1" &
+  "variable tend equal ${tstart}"
+
+print "Tg_input=${Tg_input}K"
+print "scan_range=+/-${scan_range}K,step=${tstep}K"
+print "Tmin=${Tmin}K"
+print "tstart=${tstart}K,tend=${tend}K,nsteps=${nsteps}"
+
+# ---------------- Setup (your force field) --------------
+units           real
+dimension       3
+boundary        p p p
+atom_style      full
+
+pair_style      lj/cut/coul/long 12.0 12.0
+bond_style      harmonic
+angle_style     harmonic
+dihedral_style  fourier
+improper_style  cvff
+special_bonds   amber
+pair_modify     mix arithmetic
+kspace_style    pppm 1e-6
+neighbor        3.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# Data
+read_data       ../../OPTIMIZATION/${name}/${name}_eq2.data
+
+# Integrator/timestep
+timestep        ${timestep_fs}
+reset_timestep  0
+
+# ---------------- Output (lean) ----------------
+thermo          1000
+thermo_style    custom step temp press vol density lx ly lz
+thermo_modify   flush yes
+
+variable  myTemp     equal temp
+variable  myDensity  equal density
+variable  myPress    equal press
+variable  myVol      equal vol
+fix densout all ave/time 100 1 100 v_myTemp v_myDensity v_myPress v_myVol file ${name}_tg_density.dat
+
+# ---------------- Temperature loop ----------------
+variable i loop ${nsteps}
+label    temp_loop
+
+  variable currT equal ${tstart}-(${i}-1)*${tstep}
+  fix tg_npt all npt temp ${currT} ${currT} 100.0 iso 1.0 1.0 1000.0
+  run ${eq_steps}
+  run ${prod_steps}
+  unfix tg_npt
+
+  next i
+jump SELF temp_loop
+
+# ---------------- Cleanup ----------------
+unfix densout
+clear

@@ -1,0 +1,132 @@
+log log.elastic_T
+####################################
+# 1st stage equilibration
+####################################
+units		real
+atom_style	full
+boundary	p p p
+
+bond_style		harmonic  
+angle_style		harmonic
+dihedral_style	fourier
+improper_style	cvff
+
+pair_style		lj/cut/coul/long 8.0 12.0
+pair_modify		mix arithmetic
+special_bonds	amber
+neighbor		3.0 bin
+neigh_modify	delay 0 every 1
+kspace_style	pppm 1e-6
+
+read_data       eq2.data
+
+# NPT
+fix				NPT all npt temp 300 300 100 iso 1.0 1.0 1000
+run				8000000 every 80000 "write_data eq2_*.data"
+unfix			NPT
+clear
+
+
+####################################
+# 2nd Modulus Calculation
+####################################
+include in_1.elastic
+include in_2.elastic
+include in_3.elastic
+include in_4.elastic
+include in_5.elastic
+include in_6.elastic
+include in_7.elastic
+include in_8.elastic
+include in_9.elastic
+include in_10.elastic
+include in_11.elastic
+include in_12.elastic
+include in_13.elastic
+include in_14.elastic
+include in_15.elastic
+include in_16.elastic
+include in_17.elastic
+include in_18.elastic
+include in_19.elastic
+include in_20.elastic
+include in_21.elastic
+include in_22.elastic
+include in_23.elastic
+include in_24.elastic
+include in_25.elastic
+include in_26.elastic
+include in_27.elastic
+include in_28.elastic
+include in_29.elastic
+include in_30.elastic
+include in_31.elastic
+include in_32.elastic
+include in_33.elastic
+include in_34.elastic
+include in_35.elastic
+include in_36.elastic
+include in_37.elastic
+include in_38.elastic
+include in_39.elastic
+include in_40.elastic
+include in_41.elastic
+include in_42.elastic
+include in_43.elastic
+include in_44.elastic
+include in_45.elastic
+include in_46.elastic
+include in_47.elastic
+include in_48.elastic
+include in_49.elastic
+include in_50.elastic
+include in_51.elastic
+include in_52.elastic
+include in_53.elastic
+include in_54.elastic
+include in_55.elastic
+include in_56.elastic
+include in_57.elastic
+include in_58.elastic
+include in_59.elastic
+include in_60.elastic
+include in_61.elastic
+include in_62.elastic
+include in_63.elastic
+include in_64.elastic
+include in_65.elastic
+include in_66.elastic
+include in_67.elastic
+include in_68.elastic
+include in_69.elastic
+include in_70.elastic
+include in_71.elastic
+include in_72.elastic
+include in_73.elastic
+include in_74.elastic
+include in_75.elastic
+include in_76.elastic
+include in_77.elastic
+include in_78.elastic
+include in_79.elastic
+include in_80.elastic
+include in_81.elastic
+include in_82.elastic
+include in_83.elastic
+include in_84.elastic
+include in_85.elastic
+include in_86.elastic
+include in_87.elastic
+include in_88.elastic
+include in_89.elastic
+include in_90.elastic
+include in_91.elastic
+include in_92.elastic
+include in_93.elastic
+include in_94.elastic
+include in_95.elastic
+include in_96.elastic
+include in_97.elastic
+include in_98.elastic
+include in_99.elastic
+include in_100.elastic

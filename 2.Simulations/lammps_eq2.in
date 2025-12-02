@@ -1,0 +1,69 @@
+log    ${name}_eq2.log
+####################################
+# 2nd stage equilibration
+####################################
+units		real
+atom_style	full
+boundary	p p p
+
+bond_style		harmonic  
+angle_style		harmonic
+dihedral_style	fourier
+improper_style	cvff
+
+pair_style		lj/cut/coul/long 8.0 12.0
+pair_modify		mix arithmetic
+special_bonds	amber
+neighbor		3.0 bin
+neigh_modify	delay 0 every 1 check yes
+#neigh_modify 	delay 0 every 1 check yes
+
+kspace_style	pppm 1e-4
+
+read_data       ${name}_eq1.data
+
+#dump            2 all xtc 1000 ${name}_lmp_eq2_i.xtc
+#dump_modify     2 unwrap yes
+thermo			1000
+thermo_style	custom step temp press etotal ke pe ebond eangle edihed eimp evdwl ecoul elong vol density lx ly lz
+thermo_modify	flush yes
+#restart			100000 ${name}_lmp1.rst ${name}_lmp2.rst
+
+
+
+# 1st step: NPT
+timestep		0.1
+fix				NPTi all npt temp 1000 1000 $(100.0*dt) iso 1.0 1.0 $(1000.0*dt)
+run				20000
+unfix			NPTi
+
+# 2nd step: NPT, T decreasing
+timestep		1.0
+fix				SHAKE2 all shake 1e-4 1000 0 m 1.0
+fix			    NPTs all npt temp 1000 300 $(100.0*dt) iso 1.0 1.0 $(1000.0*dt)
+run			    5000000
+unfix		    NPTs
+
+#undump          2
+reset_timestep  0
+
+#dump            3 all xtc 1000 ${name}_lmp_eq2.xtc
+#dump_modify     3 unwrap yes
+#dump       		4 all custom 1000  ${name}_lmp_eq2.dump  id type mol x y z vx vy vz # Output coordinates and velocity
+
+# calculate rg
+compute c2 all chunk/atom molecule nchunk once limit 0 ids once compress no
+compute c3 all gyration/chunk c2
+fix rg all ave/time 1 10000 10000 c_c3 file ${name}_Rg.data mode vector
+variable dens equal density
+fix 		densprint all print 1000 "${dens}" file ${name}_density.dat  screen no
+
+# 3rd step: NPT
+fix				NPTf all npt temp 300 300 $(100.0*dt) iso 1.0 1.0 $(1000.0*dt)
+run				8000000
+unfix			NPTf
+unfix rg
+unfix	densprint
+
+write_data	${name}_eq2.data
+clear

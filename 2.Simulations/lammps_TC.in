@@ -1,0 +1,74 @@
+
+log             ${name}_TC.log
+
+units           real
+atom_style      full
+pair_style      lj/cut/coul/long 12.0  12.0 
+kspace_style    pppm 1e-4
+bond_style      harmonic
+angle_style     harmonic
+dihedral_style  fourier
+improper_style  cvff
+special_bonds   amber
+pair_modify     mix arithmetic 
+read_data 		../../OPTIMIZATION/${name}/${name}_eq2.data 
+
+replicate 3 1 1
+
+#restart 100000 ${name}_rstrt_3 ${name}_rstrt_4 
+
+timestep        0.25
+
+neighbor    2.5 bin 
+neigh_modify	delay 0 every 50 check no 
+#neigh_modify 	delay 0 every 1 check yes
+
+#dump 1 all xyz 400000 ${name}.xyz 
+
+
+region rqin block $((xlo+xhi)/2-40) $((xlo+xhi)/2-35) INF INF INF INF units box
+region rqout block $((xlo+xhi)/2+35) $((xlo+xhi)/2+40) INF INF INF INF units box
+region rfree block $((xlo+xhi)/2-40) $((xlo+xhi)/2+40) INF INF INF INF units box
+group gin dynamic all region rqin
+group gout dynamic all region rqout
+group gfree region rfree
+
+
+#################### NEME Calculation #####################
+
+fix NVE gfree nve
+reset_timestep 0
+
+compute ke gfree ke/atom
+variable temp atom c_ke/0.003
+
+variable OneOverNumBins equal 1.0/(round((xhi-xlo)/1.2))
+compute xbin all chunk/atom bin/1d x center ${OneOverNumBins} units reduced
+fix 1 all ave/chunk 1 2000000 2000000 xbin v_temp norm all ave one file ${name}_temp.profile 
+
+fix 4 gin langevin 320 320 $(100.0*dt) 123456 tally yes
+fix 5 gout langevin 280 280 $(100.0*dt) 123457 tally yes
+
+thermo 10000
+thermo_style custom step temp epair emol etotal press density vol lx ly lz f_4 f_5
+thermo_modify flush yes
+
+variable my_step equal step
+variable my_temp equal temp
+variable my_epair equal epair
+variable my_emol equal emol
+variable my_etot equal etotal
+variable my_press equal press
+variable my_rho equal density
+variable my_vol equal vol
+variable my_lx equal lx
+variable my_ly equal ly
+variable my_lz equal lz
+variable my_f4 equal f_4
+variable my_f5 equal f_5
+
+fix thermo_out all print 10000 "${my_step} ${my_temp} ${my_epair} ${my_emol} ${my_etot} ${my_press} ${my_rho} ${my_vol} ${my_lx} ${my_ly} ${my_lz} ${my_f4} ${my_f5}" file ${name}_thermo.dat screen no title ""
+
+#run 200
+run 20000000
+clear

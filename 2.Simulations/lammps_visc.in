@@ -1,0 +1,116 @@
+###############################################################################
+# Polymer Diffusion (MSD) + Green–Kubo Viscosity
+# Tfinal is driven by Tg: Tfinal = Tg + 50  (pass Tg via: lmp -var Tg 250 ...)
+###############################################################################
+
+# ----------------------- Setup -----------------------
+units           real
+dimension       3
+boundary        p p p
+atom_style      full
+
+pair_style      lj/cut/coul/long 12.0 12.0
+bond_style      harmonic
+angle_style     harmonic
+dihedral_style  fourier
+improper_style  cvff
+special_bonds   amber
+pair_modify     mix arithmetic
+kspace_style    pppm 1e-6
+
+# ----------------------- Data ------------------------
+read_data       ../../OPTIMIZATION/${name}/${name}_eq2.data
+
+# ------------------- Temperature ---------------------
+# Provide Tg at the command line:  -var Tg 250
+variable        Tfinal  equal v_Tg+50.0  # K
+
+# ------------------- Timing / GK ---------------------
+variable        dt  equal 1.0     # fs
+timestep        ${dt}
+variable        p   equal 2000    # correlation length
+variable        s   equal 10      # sample interval
+variable        d   equal ${p}*${s}  # thermo/ACF interval
+
+# ----------------- Conversions -----------------------
+variable        kB     equal 1.380649e-23
+variable        atm2Pa equal 101325.0
+variable        A2m    equal 1.0e-10
+variable        fs2s   equal 1.0e-15
+variable        convert equal ${atm2Pa}*${atm2Pa}*${fs2s}*${A2m}*${A2m}*${A2m}  # GK
+# MSD unit helper: Å^2/fs -> cm^2/s factor is 0.1
+# (1 Å = 1e-8 cm, 1 fs = 1e-15 s) => Å^2/fs * 1e-16 / 1e-15 = 0.1
+
+# ------------------- Thermo vars ---------------------
+variable        volume   equal vol
+variable        ndens    equal count(all)/vol   # atoms/Å^3
+
+
+fix				NPTf all npt temp ${Tfinal} ${Tfinal} 100 iso 1.0 1.0 1000
+run				1000000
+unfix			NPTf
+reset_timestep  0
+
+# ------------------- Groups / Fix --------------------
+fix             NVT all nvt temp ${Tfinal} ${Tfinal} 100.0
+
+###############################################################################
+# Diffusion of polymer (MSD of all polymer atoms)
+###############################################################################
+compute         MSD_poly all msd             # c_MSD_poly[4] = total MSD (Å^2)
+
+# Two-point instantaneous D(t) = MSD(t)/(6t); convert to cm^2/s (0.1 factor)
+variable        D_two  equal c_MSD_poly[4]/(6.0*(step*${dt}+1.0e-6))*0.1
+
+# Slope/Einstein method: store MSD every 10 steps and take slope
+fix             VEC_POLY all vector 10 c_MSD_poly[4]
+variable        D_slope equal slope(f_VEC_POLY)/(6.0*(10.0*${dt}))*0.1
+
+# Optional diagnostics: write MSD and D time series
+fix             MSD_OUT  all ave/time 100 1 1000 c_MSD_poly[*]        file ${name}_msd_poly.dat
+fix             D_OUT    all ave/time 10 100000 1000000 v_D_two v_D_slope file ${name}_diff_poly_series.dat
+
+###############################################################################
+# Green–Kubo viscosity
+###############################################################################
+variable        pxy equal pxy
+variable        pxz equal pxz
+variable        pyz equal pyz
+
+fix             SS all ave/correlate ${s} ${p} ${d} v_pxy v_pxz v_pyz type auto file ${name}_GK.dat ave running
+
+variable        scale equal ${convert}/(${kB}*${Tfinal})*${volume}*${s}*${dt}
+variable        v11   equal trap(f_SS[3])*${scale}
+variable        v22   equal trap(f_SS[4])*${scale}
+variable        v33   equal trap(f_SS[5])*${scale}
+
+# ------------------- Thermo print --------------------
+thermo          ${d}
+thermo_style    custom step temp press v_pxy v_pxz v_pyz v_v11 v_v22 v_v33 v_D_slope
+
+###############################################################################
+# Run
+###############################################################################
+run             5000000   # 5 ns at dt = 1 fs
+###############################################################################
+# Final values & file outputs
+###############################################################################
+# Final viscosity (Pa·s): average of the three components
+variable        viscosity equal (v_v11+v_v22+v_v33)/3.0
+
+# Final diffusion coefficients (cm^2/s)
+# D_slope is preferred; also record the last two-point estimate for reference.
+variable        D_final_slope equal v_D_slope
+variable        D_final_two   equal v_D_two
+
+# --------- Save to separate files (append one line per run) ----------
+
+print " ${Tfinal} ${D_final_slope} " file ${name}_diffusion_result.dat
+
+print "${Tfinal} ${viscosity}" file ${name}_viscosity_result.dat
+# ----------------------- Cleanup ---------------------
+unfix           NVT
+unfix           SS
+unfix           VEC_POLY
+unfix           MSD_OUT
+unfix           D_OUT

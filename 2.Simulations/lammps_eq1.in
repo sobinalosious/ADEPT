@@ -1,0 +1,76 @@
+log    ${name}_eq1.log
+####################################
+# 1st stage equilibration
+####################################
+echo	    screen
+units		real
+atom_style	full
+boundary	p p p
+
+bond_style		harmonic  
+angle_style		harmonic
+dihedral_style	fourier
+improper_style	cvff
+
+# Turn off coulomb interaction
+pair_style		lj/cut 8.0
+
+pair_modify		mix arithmetic
+special_bonds	amber
+neighbor		3.0 bin
+neigh_modify	delay 0 
+#neigh_modify 	delay 0 every 1 check yes
+
+kspace_style	none
+
+read_data       ../../MODEL/${name}/amorphous_polymer_${name}.lmps
+
+#dump            1 all xtc 1000 ${name}_lmp_eq1.xtc
+#dump_modify     1 unwrap yes
+thermo			1000
+thermo_style	custom step temp press etotal ke pe ebond eangle edihed eimp evdwl ecoul elong vol density lx ly lz
+thermo_modify	flush yes
+#restart			100000 ${name}_lmp1.rst ${name}_lmp2.rst
+
+# Minimization
+min_style	sd
+minimize	1.0e-6 1.0e-7 10000 10000
+
+min_style	fire
+minimize	1.0e-6 1.0e-7 10000 10000
+
+
+
+
+#minimize 0.001 0.001 10000 100000
+#undump		1
+
+reset_timestep  0
+
+# 1st step: NVT
+timestep	0.1
+fix			NVT1 all nvt temp 100 100 $(100.0*dt)
+run			20000
+unfix		NVT1
+
+# 2nd step: NVT, T rising
+timestep	1.0
+fix			SHAKE1 all shake 1e-4 1000 0 m 1.0
+fix			NVT2 all nvt temp 100 1000 $(100.0*dt)
+run			1000000
+unfix		NVT2
+
+# 3rd step: NPT, P and T const.
+fix			NPT1 all npt temp 1000 1000 $(100.0*dt) iso 0.1 0.1 $(1000.0*dt)
+run			50000
+unfix		NPT1
+
+# 4th step: NPT, P rising
+fix			NPT2 all npt temp 1000 1000 $(100.0*dt) iso 0.1 500.0 $(1000.0*dt)
+run			1000000
+unfix		NPT2
+
+write_data	${name}_eq1.data
+clear
+
+
