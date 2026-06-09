@@ -138,7 +138,8 @@ def main():
         return
 
     try:
-        alphat = tc / (rho * cp)   # Cp is strictly J/(kg·K)
+        rho_si = rho * 1000.0      # convert g/cm³ → kg/m³
+        alphat = tc / (rho_si * cp)   # Cp is strictly J/(kg·K)
     except Exception as e:
         print(f"[SKIP] Failed calc for {pid}: {e}")
         return
@@ -147,7 +148,7 @@ def main():
     _upsert(OUT_CSV, pid, smiles, alphat)
     print(
         f"[OK] PID={pid}: Cp={cp:.3f} J/(kg·K), TC={tc:.3f} W/(m·K), "
-        f"RHO={rho:.3f} kg/m^3 → ALPHAT={alphat:.6e} m^2/s"
+        f"RHO={rho:.3f} g/cm³ ({rho_si:.1f} kg/m³) → ALPHAT={alphat:.6e} m^2/s"
     )
 
 if __name__ == "__main__":
