@@ -207,8 +207,6 @@ The `RESULTS/` CSVs are keyed by `PID`, so results from many array tasks collect
 
 ## Citation
 
-If you use ADEPT in your research, please cite this repository. (Add your paper or DOI here.)
 
 ## License
 
-Add your license here.
