@@ -2,6 +2,12 @@
 
 **A**utomated molecular **D**ynamics **E**ngine for **P**olymer simula**T**ions
 
+![Python](https://img.shields.io/badge/python-3.10-blue.svg)
+![Conda](https://img.shields.io/badge/env-conda-44A833.svg)
+![LAMMPS](https://img.shields.io/badge/MD-LAMMPS-orange.svg)
+![Psi4](https://img.shields.io/badge/DFT-Psi4-8A2BE2.svg)
+![Status](https://img.shields.io/badge/status-research-lightgrey.svg)
+
 ADEPT is an end-to-end, high-throughput workflow that turns a list of polymer SMILES into a rich set of computed properties. Starting from SMILES strings, it builds amorphous polymer structures, runs molecular dynamics (MD) simulations with LAMMPS, computes DFT-level monomer electronic properties with Psi4, and post-processes the trajectories into tabulated polymer properties.
 
 It is designed to run as array jobs on an HPC cluster, processing many polymers in parallel with a single submission.
@@ -17,8 +23,8 @@ It is designed to run as array jobs on an HPC cluster, processing many polymers 
 - [Configuration](#configuration)
 - [Workflow Overview](#workflow-overview)
 - [Output Files](#output-files)
+- [Contributing](#contributing)
 - [Citation](#citation)
-- [License](#license)
 
 ## Features
 
@@ -193,20 +199,50 @@ POLYMER_DATA/
 ├── VISCOSITY/<PID>/
 ├── EMD/<PID>/
 └── RESULTS/
-    ├── RHO_MD.csv      # Density
-    ├── RG_MD.csv       # Radius of gyration
-    ├── HOMO_DFT.csv    # Monomer electronic properties (HOMO, LUMO, ...)
-    ├── DC_MD.csv       # Dielectric constant (+ DCD, DCE, RI, PE)
-    ├── TC_MD.csv       # Thermal conductivity
-    ├── TG_MD.csv       # Glass transition temperature
-    ├── VISC_MD.csv     # Viscosity (+ diffusion coefficient)
-    └── CP_MD.csv       # Cp, expansion coefficients, moduli, ...
+    ├── RHO_MD.csv        # Density
+    ├── RG_MD.csv         # Radius of gyration
+    ├── HOMO_DFT.csv      # HOMO (monomer DFT)
+    ├── LUMO_DFT.csv      # LUMO (monomer DFT)
+    ├── BANDGAP_DFT.csv   # Band gap (monomer DFT)
+    ├── MU_DFT.csv        # Dipole moment (monomer DFT)
+    ├── ALPHA_DFT.csv     # Dipole polarizability (monomer DFT)
+    ├── ETOTAL_DFT.csv    # Total energy (monomer DFT)
+    ├── EDCMONO_DFT.csv   # Dielectric constant, electronic component (monomer estimate)
+    ├── ERIMONO_DFT.csv   # Refractive index (monomer estimate)
+    ├── DCD_MD.csv        # Dielectric constant, dipole component (polymer)
+    ├── DCE_MD.csv        # Dielectric constant, electronic component (polymer)
+    ├── DC_MD.csv         # Dielectric constant, total (polymer)
+    ├── RI_MD.csv         # Refractive index (polymer)
+    ├── PE_MD.csv         # Permittivity (polymer)
+    ├── TC_MD.csv         # Thermal conductivity
+    ├── TG_MD.csv         # Glass transition temperature
+    ├── VISC_MD.csv       # Viscosity
+    ├── D_MD.csv          # Diffusion coefficient
+    ├── CP_MD.csv         # Specific heat (Cp)
+    ├── ALPHAT_MD.csv     # Thermal diffusivity
+    ├── ALPHAP_MD.csv     # Volume expansion coefficient
+    ├── ALPHAL_MD.csv     # Linear expansion coefficient
+    ├── K_MD.csv          # Bulk modulus
+    ├── G_MD.csv          # Shear modulus
+    ├── E_MD.csv          # Young's modulus
+    └── NU_MD.csv         # Poisson's ratio
 ```
 
 The `RESULTS/` CSVs are keyed by `PID`, so results from many array tasks collect into a single table per property.
 
+## Contributing
+
+Contributions, bug reports, and feature requests are welcome. Please open an issue to discuss a proposed change before submitting a pull request, and keep changes focused and well documented. When reporting a problem, include your scheduler, module versions, and a minimal `SMILES.csv` that reproduces the issue.
+
 ## Citation
 
+If you use ADEPT in your research, please cite:
 
-## License
-
+```bibtex
+@article{alosious2026adept,
+  title={ADEPT-PolyGraphMT: Automated Molecular Simulation and Multi-Task Multi-Fidelity Machine Learning for Polymer Property Generation and Prediction},
+  author={Alosious, Sobin and Liu, Yuhan and Xu, Jiaxin and Liu, Gang and Zhang, Renzheng and Jiang, Meng and Luo, Tengfei},
+  journal={arXiv preprint arXiv:2603.27106},
+  year={2026}
+}
+```
