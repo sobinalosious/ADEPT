@@ -242,7 +242,8 @@ If you use ADEPT in your research, please cite:
 @article{alosious2026adept,
   title={ADEPT-PolyGraphMT: Automated Molecular Simulation and Multi-Task Multi-Fidelity Machine Learning for Polymer Property Generation and Prediction},
   author={Alosious, Sobin and Liu, Yuhan and Xu, Jiaxin and Liu, Gang and Zhang, Renzheng and Jiang, Meng and Luo, Tengfei},
-  journal={arXiv preprint arXiv:2603.27106},
-  year={2026}
+  journal={Digital Discovery},
+  year={2026},
+  publisher={Royal Society of Chemistry}
 }
 ```
