@@ -200,7 +200,7 @@ if is_true "$DO_TC"; then
     echo "[FATAL] TC NEMD for $PID did not finish (no LAMMPS 'Total wall time' in TC.log) — refusing to write a kappa"
     exit 1
   fi
-  python "../../../3.Analysis/calc_TC.py" "$PID"
+  python "../../../3.Analysis/calc_TC.py" "$PID" || { echo "[FATAL] calc_TC.py failed for $PID (no usable TC windows / incomplete run) — refusing to write a kappa"; exit 1; }
   python "../../../3.Analysis/update_TC.py" "$PID"
   cd "$initial_dir"
 else
