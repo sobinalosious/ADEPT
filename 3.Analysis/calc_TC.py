@@ -140,11 +140,11 @@ if __name__ == '__main__':
     hf_success = split_hf_file(input_path, output_path, pid)
 
     if not hf_success:
-        mean_TC, std_TC = 0.00, 0.00
-        output_filename = os.path.join(output_path, f"{pid}_TC_results.dat")
-        np.savetxt(output_filename, [mean_TC, std_TC], delimiter=' ', fmt='%.6f')
-        print(f"Thermal conductivity values saved to {output_filename}")
-        sys.exit(0)
+        # Not enough thermo data (an incomplete / killed NEMD). Do NOT write a fake kappa=0.00 result
+        # and exit 0 — a 0.00 looks like a real measurement and is silently recorded downstream. Exit
+        # nonzero with no result file so the caller marks the TC stage failed (and can retry).
+        print(f"[ERROR] No usable thermo data for {pid}; not writing a TC result (incomplete run).")
+        sys.exit(1)
 
     generate_temp_file(input_path, output_path, pid)
 
