@@ -186,6 +186,20 @@ if is_true "$DO_TC"; then
   mkdir -p "POLYMER_DATA/THERMAL_CONDUCTIVITY/$PID"
   cd "POLYMER_DATA/THERMAL_CONDUCTIVITY/$PID"
   mpirun -n "$NSLOTS" lmp -in "../../../2.Simulations/lammps_TC.in" -var name "$PID"
+  tc_lmp_rc=$?
+  # --- TC completion gate: never compute kappa from a killed / partial / non-converged NEMD ---
+  # The pipeline records a kappa the moment a row lands in TC_MD.csv, so a kappa from an incomplete run
+  # would be silently recorded. The robust, thermo-interval-independent signal that the NEMD actually
+  # FINISHED is LAMMPS' own "Total wall time" line, written ONLY when the run completes normally
+  # (a SIGTERM / wall-time / requeue kill omits it).
+  if [ "$tc_lmp_rc" -ne 0 ]; then
+    echo "[FATAL] TC NEMD (lmp) exited $tc_lmp_rc for $PID — not a clean run; refusing to write a kappa"
+    exit 1
+  fi
+  if [ ! -s "${PID}_TC.log" ] || ! grep -q "Total wall time" "${PID}_TC.log"; then
+    echo "[FATAL] TC NEMD for $PID did not finish (no LAMMPS 'Total wall time' in TC.log) — refusing to write a kappa"
+    exit 1
+  fi
   python "../../../3.Analysis/calc_TC.py" "$PID"
   python "../../../3.Analysis/update_TC.py" "$PID"
   cd "$initial_dir"
