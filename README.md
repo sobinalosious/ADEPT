@@ -51,7 +51,8 @@ It is designed to run as array jobs on an HPC cluster, processing many polymers 
 ```text
 ADEPT/
 ├── 1.AmorphousGeneration/      # Structure generation and DFT
-│   ├── APG_resp.py             # Amorphous polymer generation (RESP charges)
+│   ├── APG_qm.py               # Amorphous polymer generation (RESP/ESP charges, used by files.sh)
+│   ├── APG_resp.py             # Legacy RESP script (no longer called; fits the uncapped repeat unit)
 │   ├── APG_gas.py              # Amorphous polymer generation (Gasteiger charges)
 │   └── electronic_properties.py# Monomer DFT properties (Psi4)
 ├── 2.Simulations/              # LAMMPS input files
@@ -166,7 +167,7 @@ All run settings live in `submit.sh`. Edit the property toggles to choose which 
 
 Additional settings in `submit.sh`:
 
-- `CHARGE_METHOD` — `"RESP"` or `"GASTEIGER"`. RESP is more accurate (recommended when computing the dielectric constant) but slower than Gasteiger.
+- `CHARGE_METHOD` — `"RESP"`, `"ESP"` or `"GASTEIGER"`. RESP (HF/6-31G*, restrained) and ESP (ωB97X-D/def2-TZVP, unrestrained) are fit with Psi4 on the H-capped monomer; each removed cap-H charge is folded onto its head/tail atom so the repeat unit stays neutral. RESP is more accurate (recommended when computing the dielectric constant) but slower than Gasteiger.
 - `SMILES_FILE` — input CSV (default `SMILES.csv`).
 - `CSV_START_LINE` — `2` to skip the header (default), or `1` if the file has no header.
 

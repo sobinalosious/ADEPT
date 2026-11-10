@@ -123,10 +123,11 @@ fi
 if is_true "$DO_APG"; then
   method_norm="$(echo "$CHARGE_METHOD" | tr '[:lower:]' '[:upper:]')"
   case "$method_norm" in
-    RESP)      apg_script="APG_resp.py" ;;
+    RESP)      apg_script="APG_qm.py"; export ADEPT_CHARGE_SCHEME=RESP ;;
+    ESP)       apg_script="APG_qm.py"; export ADEPT_CHARGE_SCHEME=ESP ;;
     GASTEIGER) apg_script="APG_gas.py"  ;;
     *)
-      echo "[ERROR] CHARGE_METHOD must be RESP or GASTEIGER (got: '$CHARGE_METHOD')"
+      echo "[ERROR] CHARGE_METHOD must be RESP, ESP or GASTEIGER (got: '$CHARGE_METHOD')"
       exit 1
       ;;
   esac
