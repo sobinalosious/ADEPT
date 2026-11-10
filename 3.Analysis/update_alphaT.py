@@ -7,7 +7,7 @@
 # Inputs (../../RESULTS/):
 #   - CP_MD.csv     (PID, SMILES, CP)       [J/(kg·K)]
 #   - TC_MD.csv     (PID, SMILES, TC)       [W/(m·K)]
-#   - RHO_MD.csv    (PID, SMILES, RHO)      [kg/m^3]
+#   - RHO_MD.csv    (PID, SMILES, RHO)      [g/cm^3]  (converted to kg/m^3 below)
 #
 # Output:
 #   - ALPHAT_MD.csv  (PID, SMILES, ALPHAT)  [m^2/s]

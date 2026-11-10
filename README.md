@@ -200,36 +200,45 @@ POLYMER_DATA/
 ├── VISCOSITY/<PID>/
 ├── EMD/<PID>/
 └── RESULTS/
-    ├── RHO_MD.csv        # Density
-    ├── RG_MD.csv         # Radius of gyration
-    ├── HOMO_DFT.csv      # HOMO (monomer DFT)
-    ├── LUMO_DFT.csv      # LUMO (monomer DFT)
-    ├── BANDGAP_DFT.csv   # Band gap (monomer DFT)
-    ├── MU_DFT.csv        # Dipole moment (monomer DFT)
-    ├── ALPHA_DFT.csv     # Dipole polarizability (monomer DFT)
-    ├── ETOTAL_DFT.csv    # Total energy (monomer DFT)
-    ├── EDCMONO_DFT.csv   # Dielectric constant, electronic component (monomer estimate)
-    ├── ERIMONO_DFT.csv   # Refractive index (monomer estimate)
-    ├── DCD_MD.csv        # Dielectric constant, dipole component (polymer)
-    ├── DCE_MD.csv        # Dielectric constant, electronic component (polymer)
-    ├── DC_MD.csv         # Dielectric constant, total (polymer)
-    ├── RI_MD.csv         # Refractive index (polymer)
-    ├── PE_MD.csv         # Permittivity (polymer)
-    ├── TC_MD.csv         # Thermal conductivity
-    ├── TG_MD.csv         # Glass transition temperature
-    ├── VISC_MD.csv       # Viscosity
-    ├── D_MD.csv          # Diffusion coefficient
-    ├── CP_MD.csv         # Specific heat (Cp)
-    ├── ALPHAT_MD.csv     # Thermal diffusivity
-    ├── ALPHAP_MD.csv     # Volume expansion coefficient
-    ├── ALPHAL_MD.csv     # Linear expansion coefficient
-    ├── K_MD.csv          # Bulk modulus
-    ├── G_MD.csv          # Shear modulus
-    ├── E_MD.csv          # Young's modulus
-    └── NU_MD.csv         # Poisson's ratio
+    ├── RHO_MD.csv        # Density [g/cm^3]
+    ├── RG_MD.csv         # Radius of gyration [Å]
+    ├── HOMO_DFT.csv      # HOMO (monomer DFT) [eV]
+    ├── LUMO_DFT.csv      # LUMO (monomer DFT) [eV]
+    ├── BANDGAP_DFT.csv   # HOMO-LUMO gap, LUMO - HOMO (monomer DFT) [eV]
+    ├── MU_DFT.csv        # Dipole moment (monomer DFT) [Debye]
+    ├── ALPHA_DFT.csv     # Isotropic dipole polarizability (monomer DFT) [Å^3]
+    ├── ETOTAL_DFT.csv    # Total energy (monomer DFT) [kcal/mol]
+    ├── EDCMONO_DFT.csv   # Dielectric constant, electronic component (monomer estimate) [-]
+    ├── ERIMONO_DFT.csv   # Refractive index (monomer estimate) [-]
+    ├── EPERMONO_DFT.csv  # Absolute permittivity, electronic (monomer estimate) [F/m]
+    ├── DCD_MD.csv        # Dielectric constant, dipole component (polymer) [-]
+    ├── DCE_MD.csv        # Dielectric constant, electronic component (polymer) [-]
+    ├── DC_MD.csv         # Relative dielectric constant, total (polymer) [-]
+    ├── RI_MD.csv         # Refractive index (polymer) [-]
+    ├── PE_MD.csv         # Absolute permittivity, total, ε = DC × ε0 (polymer) [pF/m]
+    ├── TC_MD.csv         # Thermal conductivity, NEMD, 320/280 K reservoirs (mean 300 K) [W/(m·K)]
+    ├── TG_MD.csv         # Glass transition temperature [K]
+    ├── VISC_MD.csv       # Viscosity, Green-Kubo at T = Tg + 50 K (TEMP column) [Pa·s]
+    ├── D_MD.csv          # Self-diffusion coefficient at T = Tg + 50 K (TEMP column) [cm^2/s]
+    ├── CP_MD.csv         # Specific heat capacity Cp [J/(kg·K)]
+    ├── ALPHAT_MD.csv     # Thermal diffusivity, κ/(ρ·Cp) [m^2/s]
+    ├── ALPHAP_MD.csv     # Volumetric thermal expansion coefficient [1/K]
+    ├── ALPHAL_MD.csv     # Linear thermal expansion coefficient, ALPHAP/3 [1/K]
+    ├── K_MD.csv          # Bulk modulus [GPa]
+    ├── G_MD.csv          # Shear modulus [GPa]
+    ├── E_MD.csv          # Young's modulus [GPa]
+    └── NU_MD.csv         # Poisson's ratio [-]
 ```
 
 The `RESULTS/` CSVs are keyed by `PID`, so results from many array tasks collect into a single table per property.
+
+### Notes on property definitions
+
+- **Units.** Values are written in the units shown in brackets above, with no scaling. Derived datasets may rescale or rename columns. For example, the ADEPT-PolyGraphMT training data store thermal diffusivity as `TD_MD.csv` in units of 10⁻⁷ m²/s (this is the same quantity as `ALPHAT_MD.csv`). Check the units of any derived file before use.
+- **`BANDGAP_DFT`** is the HOMO-LUMO gap of the isolated monomer (repeat unit) from Psi4 DFT, not the band gap of a polymer chain or solid. It is typically larger than measured optical band gaps.
+- **`DC_MD` vs `PE_MD`.** `DC_MD` is the relative (dimensionless) static dielectric constant, ε = ε_el + ε_dip − 1, where ε_el = n² comes from the DFT polarizability via Lorentz-Lorenz and ε_dip comes from MD dipole fluctuations. `PE_MD` is the absolute permittivity, DC × ε0, in pF/m; it is not a relative permittivity.
+- **Glass transition temperature.** `TG_MD` comes from stepwise NPT cooling over Tg_ML ± 150 K (lower bound 50 K) in 10 K steps of 0.5 ns equilibration + 0.5 ns production (about 10 K/ns), followed by a bilinear fit of density vs temperature. The 1000 → 300 K cool-down in the equilibration step (about 140 K/ns) is part of structure preparation and is not the Tg protocol.
+- **Viscosity and diffusion** are computed at T = Tg + 50 K, using MD Tg when available and the ML-predicted Tg otherwise; the temperature is recorded in the `TEMP` column.
 
 ## Contributing
 
