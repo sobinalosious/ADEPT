@@ -15,7 +15,7 @@ angle_style     harmonic
 dihedral_style  fourier
 improper_style  cvff
 special_bonds   amber
-pair_modify     mix arithmetic
+pair_modify     mix arithmetic tail yes
 kspace_style    pppm 1e-6
 
 # ----------------------- Data ------------------------
