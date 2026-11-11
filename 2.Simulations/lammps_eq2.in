@@ -12,7 +12,7 @@ dihedral_style	fourier
 improper_style	cvff
 
 pair_style		lj/cut/coul/long 8.0 12.0
-pair_modify		mix arithmetic
+pair_modify		mix arithmetic tail yes
 special_bonds	amber
 neighbor		3.0 bin
 neigh_modify	delay 0 every 1 check yes
