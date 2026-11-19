@@ -41,7 +41,13 @@ unfix			NPTi
 timestep		1.0
 fix				SHAKE2 all shake 1e-4 1000 0 m 1.0
 fix			    NPTs all npt temp 1000 300 $(100.0*dt) iso 1.0 1.0 $(1000.0*dt)
-run			    5000000
+# Run the ramp as 50 x 100 ps segments (start/stop keep the ramp continuous). Each new run rebuilds the PPPM grid
+# for the current box; a single 5 ns run lets the shrinking box outgrow it ("Out of range atoms - cannot compute PPPM").
+variable seg2 loop 50
+label ramp2
+run			    100000 start 20000 stop 5020000
+next seg2
+jump SELF ramp2
 unfix		    NPTs
 
 #undump          2
@@ -60,7 +66,11 @@ fix 		densprint all print 1000 "${dens}" file ${name}_density.dat  screen no
 
 # 3rd step: NPT
 fix				NPTf all npt temp 300 300 $(100.0*dt) iso 1.0 1.0 $(1000.0*dt)
-run				8000000
+variable seg3 loop 16
+label hold3
+run				500000 start 0 stop 8000000
+next seg3
+jump SELF hold3
 unfix			NPTf
 unfix rg
 unfix	densprint
