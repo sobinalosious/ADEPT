@@ -15,7 +15,7 @@ improper_style	cvff
 # Turn off coulomb interaction
 pair_style		lj/cut 8.0
 
-pair_modify		mix arithmetic
+pair_modify		mix arithmetic tail yes
 special_bonds	amber
 neighbor		3.0 bin
 neigh_modify	delay 0 
